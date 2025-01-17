@@ -4,18 +4,12 @@ def calculate_checksum(data_bytes):
 
 def decode_data(encoded_string):
     """Decode the data according to the specified protocol and verify checksum."""
-    if not (encoded_string.startswith('$') and encoded_string.endswith(';')):
-        raise ValueError("Invalid data format")
-
-    # Remove the start and end symbols
-    encoded_string = encoded_string[1:-1]
-
     # Convert hex string to bytes
     data_bytes = bytes.fromhex(encoded_string)
 
     # Extract the footer and checksum
-    footer = data_bytes[-2]
-    checksum = data_bytes[-1]
+    footer = data_bytes[-1]
+    checksum = data_bytes[-2]
     data_bytes = data_bytes[:-2]
 
     # Verify footer
@@ -66,6 +60,6 @@ def decode_data(encoded_string):
     }
 
 # Example usage
-encoded_string = "$2419010713093600320D05100033FF3B3B58;"
+encoded_string = "2419010713093600320D05100033FF3B583B"
 decoded_data = decode_data(encoded_string)
 print(decoded_data)

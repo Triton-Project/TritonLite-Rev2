@@ -44,12 +44,12 @@ def encode_data(year, month, day, hour, minute, second, sup_start, sup_stop, exh
     footer = 0x3B  # ';' symbol
 
     # Finalize the data
-    data_bytes.append(footer)
     data_bytes.append(checksum)
+    data_bytes.append(footer)
 
     # Convert to hex string
     hex_string = ''.join(f'{byte:02X}' for byte in data_bytes)
-    return f'${hex_string};'
+    return f'{hex_string}'
 
 # Example usage
 data_string = encode_data(
