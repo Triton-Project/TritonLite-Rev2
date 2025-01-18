@@ -1,11 +1,21 @@
 void setup() {
+  // シリアル通信の初期化
   Serial.begin(9600);
-  const char* encoded_string = "24190112112D3A00720202032A270FF1923B";
-  decode_data(encoded_string);
+  while (!Serial) {
+    ;  // シリアルポートが接続されるまで待つ
+  }
 }
 
 void loop() {
-  // Empty loop
+  // シリアルデータの受信
+  if (Serial.available() > 0) {
+    String receivedData = Serial.readStringUntil('\n');
+    Serial.print("Received: ");
+    Serial.println(receivedData);
+
+    // デコード処理
+    decode_data(receivedData.c_str());
+  }
 }
 
 uint8_t calculate_checksum(uint8_t* data_bytes, size_t length) {
