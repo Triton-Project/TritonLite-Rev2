@@ -12,6 +12,11 @@ def decode_data(encoded_string):
     checksum = data_bytes[-2]
     data_bytes = data_bytes[:-2]
 
+    # Extract data fields
+    header = data_bytes[0]
+    if header != 0x24:
+        raise ValueError("Invalid header")
+
     # Verify footer
     if footer != 0x3B:
         raise ValueError("Invalid footer")
@@ -20,11 +25,6 @@ def decode_data(encoded_string):
     calculated_checksum = calculate_checksum(data_bytes)
     if calculated_checksum != checksum:
         raise ValueError("Checksum does not match")
-
-    # Extract data fields
-    header = data_bytes[0]
-    if header != 0x24:
-        raise ValueError("Invalid header")
 
     year_offset = data_bytes[1]
     year = 2000 + year_offset
