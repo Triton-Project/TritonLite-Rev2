@@ -1,7 +1,9 @@
-# File: utils_mac.py
-# Author: Shintaro Matsumoto(m-shintaro)
-# Date: 2025-01-19
-# Description: Triton-Lite用のCLIアプリ for MacOS
+"""
+# @file main_mac.py
+# @author Shintaro Matsumoto
+# @date 2025-01-19
+# @brief Triton-Lite用のCLIアプリ for MacOS
+"""
 
 import serial
 import time
@@ -31,7 +33,6 @@ if __name__ == '__main__':
         except serial.SerialException as e:
             print(f"Error: Could not open port {com_port}. {e}")
             print("If you have more than one instance of the application open, please close them and try again.")
-
 
     # 現在時刻を取得
     dt_now = datetime.datetime.now()
