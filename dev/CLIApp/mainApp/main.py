@@ -1,4 +1,7 @@
-# Windows用
+# File: main.py
+# Author: Shintaro Matsumoto(m-shintaro)
+# Date: 2025-01-18
+# Description: Triton-Lite用のCLIアプリ for Windows
 
 import serial
 import time

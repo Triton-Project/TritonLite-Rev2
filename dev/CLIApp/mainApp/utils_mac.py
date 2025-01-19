@@ -1,3 +1,8 @@
+# File: utils_mac.py
+# Author: Shintaro Matsumoto(m-shintaro)
+# Date: 2025-01-19
+# Description: Triton-Lite用のCLIアプリの関数類 for MacOS
+
 import serial.tools.list_ports
 
 def calculate_checksum(data_bytes):

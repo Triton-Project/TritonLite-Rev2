@@ -1,4 +1,7 @@
-# Mac用
+# File: utils_mac.py
+# Author: Shintaro Matsumoto(m-shintaro)
+# Date: 2025-01-19
+# Description: Triton-Lite用のCLIアプリ for MacOS
 
 import serial
 import time

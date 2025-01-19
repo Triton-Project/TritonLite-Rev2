@@ -1,5 +1,10 @@
+# File: virtual_serial.py
+# Author: Shintaro Matsumoto(m-shintaro)
+# Date: 2025-01-19
+# Description: 仮想シリアルポートを使用し，アプリからの入力に返答するデバッグスクリプト
+
 """
-macで仮想的にpythonでシリアル通信を返答するようにするやつ
+Mac専用です
 
 sudo socat -d -d PTY,raw,echo=0 PTY,raw,echo=0
 で出てきたポート名(/dev/ttys000とか)の権限を変更
