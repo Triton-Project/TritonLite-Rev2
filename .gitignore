@@ -1,10 +1,10 @@
-dev/SyncRTCTime/.env
-dev/CLIApp/Send2Arduino/Python/__pycache__/
-dev/CLIApp/mainApp/__pycache__/
+Control_App/dev/SyncRTCTime/.env
+Control_App/dev/CLIApp/Send2Arduino/Python/__pycache__/
+Control_App/dev/CLIApp/mainApp/__pycache__/
 build/
 dist/
 main.spec
-dev/CLIApp/mainApp/html/
-dev/CLIApp/mainApp/latex/
+Control_App/dev/CLIApp/mainApp/html/
+Control_App/dev/CLIApp/mainApp/latex/
 .github/
 .vscode/
