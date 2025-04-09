@@ -6,3 +6,5 @@ dist/
 main.spec
 dev/CLIApp/mainApp/html/
 dev/CLIApp/mainApp/latex/
+.github/
+.vscode/
