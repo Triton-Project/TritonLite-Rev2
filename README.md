@@ -1,168 +1,499 @@
-# TritonLite-Rev2
-Triton-Lite用のプログラム修正版
-
-
-# Arduinoのコーディング規約
-
-堅牢で信頼性の高いArduinoシステムを構築するために、以下のコーディング規約を遵守してください。この規約は、bit数の厳密な指定やエラー処理、モジュール化など、システムの堅牢性を最大化するための指針を提供します。
+# Arduinoコーディング規約
 
 ## 基本原則
 
-1. **可読性を重視する:** コードは他の開発者が理解しやすいように記述する。
-2. **一貫性を保つ:** 命名規則やインデントスタイルを統一する。
-3. **堅牢性を優先:** エラー処理を徹底し、予期せぬ入力や動作に対する耐性を確保する。
-4. **リソースの効率的利用:** メモリや処理能力を無駄にしない。
-
-## データ型の使用
-
-- **固定幅整数を使用:** bit数を明確に指定することで、プラットフォーム依存の問題を回避する。
-    - 使用例:
-        ```cpp
-        uint8_t counter = 0;  // 8-bit unsigned integer
-        int16_t temperature = -32768;  // 16-bit signed integer
-        ```
-- **bool型を活用:** 真偽値には`bool`型を使用する。
+1. **可読性重視**: コードは他の開発者が容易に理解できるように記述する
+2. **一貫性の維持**: 命名規則やコードスタイルを統一する
+3. **堅牢性の確保**: 適切なエラー処理と予期せぬ状況への対応
+4. **リソース効率**: Arduinoの限られたメモリと処理能力を効率的に使用する
 
 ## 命名規則
 
-- **変数名:** `camelCase`を使用し、意味のある名前を付ける。
-    - 使用例: `sensorValue`, `ledState`
-- **定数:** `UPPER_SNAKE_CASE`を使用。 `const`または`constexpr`キーワードと共に型を明示的に指定する。
-    - 使用例: `const uint16_t MAX_RETRIES = 3;`, `constexpr uint8_t LED_PIN = 13;`
-- **関数名:** `camelCase`を使用し、動詞から始める。
-    - 使用例: `initializeSensor`, `readTemperature`
+### 変数
+
+#### グローバル変数
+- `g_` プレフィックスを使用し、`camelCase` で記述
+  ```cpp
+  uint16_t g_systemUptime;
+  bool g_isSystemInitialized;
+  SensorData g_lastSensorReading;
+  ```
+
+#### ローカル変数
+- プレフィックスなしの `camelCase` で記述
+  ```cpp
+  void processData() {
+    int sensorValue = analogRead(PIN_SENSOR);
+    float convertedValue = sensorValue * 0.0048;
+    bool isValidReading = (convertedValue > MIN_THRESHOLD);
+  }
+  ```
+
+#### メンバ変数
+- アンダースコアプレフィックス `_` を使用し、`camelCase` で記述
+  ```cpp
+  class Sensor {
+  private:
+    int _pin;
+    long _lastReadTime;
+    float _calibrationFactor;
+  };
+  ```
+
+#### 静的変数
+- `s_` プレフィックスを使用し、`camelCase` で記述
+  ```cpp
+  static uint8_t s_errorCount = 0;
+  ```
+
+- **ブール変数**: 全ての種類の変数において、`is`, `has`, `can` などの接頭辞を付ける
+  ```cpp
+  bool g_isConnected;          // グローバル
+  bool isDataReady;            // ローカル
+  bool _hasNewReading;         // メンバ
+  static bool s_canProceed;    // 静的
+  ```
+
+### 定数
+
+- **定数**: `UPPER_SNAKE_CASE` で記述し、型を明示
+  ```cpp
+  const uint8_t LED_PIN = 13;
+  constexpr uint16_t MAX_SENSOR_VALUE = 1023;
+  ```
+
+- **グローバル定数**: 型を明示したプレフィックス付きの `UPPER_SNAKE_CASE`
+  ```cpp
+  constexpr uint8_t U8_MAX_RETRIES = 3;
+  const float F_CONVERSION_FACTOR = 0.0048;
+  ```
+
+- **ピン定義**: `PIN_` プレフィックスを使用
+  ```cpp
+  constexpr uint8_t PIN_LED = 13;
+  constexpr uint8_t PIN_BUTTON = 2;
+  ```
+
+### 関数
+
+- **関数名**: `camelCase` で記述し、動詞で開始
+  ```cpp
+  void initSystem();
+  bool readSensor();
+  float calculateAverage();
+  ```
+
+- **getter/setter**: `get`/`set` プレフィックスを使用
+  ```cpp
+  int getTemperature();
+  void setThreshold(int value);
+  ```
+
+### 列挙型
+
+- **enum class**: 名前は `PascalCase`、値は `UPPER_SNAKE_CASE`
+  ```cpp
+  enum class SensorState {
+    NOT_INITIALIZED,
+    INITIALIZING,
+    READY,
+    ERROR
+  };
+  ```
+
+## データ型
+
+- **固定幅整数型**: 必ず bit 数を明示
+  ```cpp
+  uint8_t counter;      // 0-255
+  int16_t temperature;  // -32768 to 32767
+  uint32_t timestamp;   // 大きな非負整数
+  ```
+
+- **浮動小数点**: 精度要件に応じて選択
+  ```cpp
+  float voltage;      // 一般的な用途
+  double precision;   // 高精度が必要な場合（ただしメモリ使用量に注意）
+  ```
+
+- **文字列**: `String` クラスは避け、`char` 配列か `PGM_P`（プログラムメモリ文字列）を使用
+  ```cpp
+  // 避けるべき方法
+  String message = "Status OK";  // メモリ断片化の原因になる
+
+  // 推奨される方法
+  char message[20] = "Status OK";
+  
+  // プログラムメモリに格納する方法（フラッシュメモリ節約）
+  const char message[] PROGMEM = "Status OK";
+  ```
 
 ## コード構造
 
-- **関数の分割:** 各関数は単一の責任を持つように設計する。
-- **ヘッダファイルと実装ファイルを分離:** 複数のファイルに分割してモジュール化を促進する。
-    - クラスの定義例:
-        ```cpp
-        // Sensor.h
-        #ifndef SENSOR_H
-        #define SENSOR_H
+### ファイル構成
 
-        class Sensor {
-        public:
-          Sensor(uint8_t pin);
-          bool initialize();
-          int16_t readData();
+- ヘッダファイル（`.h`）にはクラス/関数宣言を、実装ファイル（`.cpp`）には定義を配置
+- 各ファイルの先頭には簡潔な説明を記載
+- インクルードガードを必ず使用
 
-        private:
-          uint8_t _pin;
-        };
+```cpp
+// Sensor.h
+#ifndef SENSOR_H
+#define SENSOR_H
 
-        #endif
+class Sensor {
+public:
+  Sensor(uint8_t pin);
+  bool initialize();
+  int16_t readValue();
 
-        // Sensor.cpp
-        #include "Sensor.h"
+private:
+  uint8_t _pin;
+};
 
-        Sensor::Sensor(uint8_t pin) : _pin(pin) {}
+#endif // SENSOR_H
+```
 
-        bool Sensor::initialize() {
-          // 初期化処理
-          return true; // 成功したらtrue、失敗したらfalseを返す
-        }
+### 関数設計
 
-        int16_t Sensor::readData() {
-          // データ読み込み処理
-          return 0;
-        }
-        ```
+- 各関数は単一責任の原則に従う
+- 関数の長さは画面一画面（約30行）以内に収める
+- 入力の検証を必ず行う
+
+```cpp
+bool setSensorThreshold(int16_t value) {
+  // 入力値の検証
+  if (value < MIN_THRESHOLD || value > MAX_THRESHOLD) {
+    return false;
+  }
+  
+  _threshold = value;
+  return true;
+}
+```
+
+## コメント
+
+### 関数ドキュメント
+
+- Doxygen形式でコメントを記述
+- パラメータ、戻り値、例外を明記
+
+```cpp
+/**
+ * @brief センサーから温度を読み取る
+ * 
+ * @param sensorPin センサーが接続されているアナログピン
+ * @return float 摂氏温度。読み取りに失敗した場合はNAN
+ * @note この関数は最大100msのブロッキング処理を含む
+ */
+float readTemperature(uint8_t sensorPin) {
+  // 実装...
+}
+```
+
+### インラインコメント
+
+- 複雑なロジックには説明を追加
+- **何を**ではなく**なぜ**を説明
+
+```cpp
+// 不適切なコメント
+i++; // インクリメント
+
+// 適切なコメント
+delayCounter++; // 5回のサンプリングごとに平均値を計算するためのカウンタ
+```
+
+### コード領域の説明
+
+- 機能ブロックには見出しコメントを付ける
+
+```cpp
+//===== センサー初期化 =====
+pinMode(PIN_SENSOR_POWER, OUTPUT);
+digitalWrite(PIN_SENSOR_POWER, HIGH);
+delay(100); // センサー起動待ち
+
+//===== 通信設定 =====
+Serial.begin(9600);
+Wire.begin();
+```
 
 ## エラー処理
 
-- **戻り値の確認:** 関数の戻り値を常に確認する。
-- **エラーコードの定義:** enumクラスを用いてエラーコードを定義し、関数の戻り値として返す。
-    ```cpp
-    enum class ErrorCode : int {
-        NoError = 0,
-        SensorInitError = 1,
-        TimeoutError = 2,
-        // ...
-    };
-    ```
-- **ログ出力:** `Serial.println()`を使用してエラーメッセージを出力する。フォーマットは`[エラーコード]: エラーメッセージ`とする。
-    ```cpp
-    ErrorCode errorCode = initializeSensor();
-    if (errorCode != ErrorCode::NoError) {
-        Serial.print("[");
-        Serial.print(static_cast<int>(errorCode));
-        Serial.print("]: Sensor initialization failed.");
-    }
-    ```
-- **エラーLED:** エラー発生時に専用のLEDを点灯させる。
-- **タイムアウトの設定:** 永久ループを避け、適切にタイムアウトを設定する。 定数としてタイムアウト時間を定義する。
-    ```cpp
-    constexpr unsigned long TIMEOUT_MS = 5000; // 5 seconds
-    unsigned long startTime = millis();
-    while (!dataReady()) {
-        if (millis() - startTime > TIMEOUT_MS) {
-            // タイムアウトエラー処理
-            break;
-        }
-    }
-    ```
+### エラーコード
 
-## コメントの記述
+- エラー状態は列挙型で定義
 
-- **関数コメント:** Doxygen形式で記述する。
-    ```cpp
-    /**
-     * @brief センサーを初期化する
-     * 
-     * @return ErrorCode::NoError  初期化成功
-     * @return ErrorCode::SensorInitError 初期化失敗
-     */
-    ErrorCode initializeSensor();
-    ```
-- **その他コメント:** コードの意図や動作を明確に説明するコメントを記述する。 何をしているかだけでなく、なぜそうしているのかを説明する。
+```cpp
+enum class ErrorCode : uint8_t {
+  SUCCESS = 0,
+  SENSOR_NOT_FOUND = 1,
+  CALIBRATION_FAILED = 2,
+  COMMUNICATION_ERROR = 3,
+  TIMEOUT = 4
+};
+```
+
+### エラー管理
+
+- エラー発生時は早期リターン
+- エラーログ記録の統一関数を用意
+
+```cpp
+ErrorCode result = initSensor();
+if (result != ErrorCode::SUCCESS) {
+  logError("Sensor init failed", result);
+  return false;
+}
+```
+
+### 例外処理
+
+- 通常の例外処理は不用意にシステムを停止させるので避ける
+- 重大なエラーは専用のエラー状態に遷移させる
+
+```cpp
+if (errorDetected) {
+  systemState = SystemState::ERROR;
+  activateErrorLed();
+  // 必要に応じてWatchdogタイマーでリセット
+}
+```
+
+## Arduino特有のガイドライン
+
+### タイミング制御
+
+- `delay()`関数の使用を最小限に抑える
+- 非ブロッキング処理を実装
+
+```cpp
+// 非推奨
+void loop() {
+  readSensors();
+  delay(1000);
+}
+
+// 推奨
+unsigned long previousMillis = 0;
+const unsigned long interval = 1000;
+
+void loop() {
+  unsigned long currentMillis = millis();
+  
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    readSensors();
+  }
+  
+  // その他の処理を継続して実行できる
+}
+```
+
+### メモリ管理
+
+- 動的メモリ割り当て（`new`/`malloc`）は避ける
+- グローバル変数を最小限に抑える
+- 大きな配列は `PROGMEM` に格納
+
+```cpp
+// メモリ効率の良い文字列定義
+const char MESSAGE_READY[] PROGMEM = "System ready";
+const char MESSAGE_ERROR[] PROGMEM = "Error detected";
+
+// 使用時
+char buffer[32];
+strcpy_P(buffer, (PGM_P)pgm_read_word(&MESSAGE_READY));
+Serial.println(buffer);
+```
+
+### 割り込み処理
+
+- 割り込みサービスルーチン（ISR）は短く、シンプルに
+- ISR内では`Serial`や複雑な計算を避ける
+- 共有変数には`volatile`修飾子を使用
+
+```cpp
+volatile bool g_buttonPressed = false;
+
+void setup() {
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), buttonISR, FALLING);
+}
+
+void buttonISR() {
+  g_buttonPressed = true;  // フラグのみ設定し、実際の処理はloop()で行う
+}
+
+void loop() {
+  if (g_buttonPressed) {
+    handleButtonPress();
+    g_buttonPressed = false;
+  }
+}
+```
+
+### シリアル通信
+
+- シリアル通信のフォーマットを統一
+- データ送信のプロトコルを明確に定義
+
+```cpp
+// JSON形式でのデータ送信例
+void sendSensorData(float temperature, uint16_t light) {
+  Serial.print("{\"temp\":");
+  Serial.print(temperature, 1);  // 小数点1桁
+  Serial.print(",\"light\":");
+  Serial.print(light);
+  Serial.println("}");
+}
+```
 
 ## コードスタイル
 
-- **インデント:** スペース4つを使用する。
-- **中括弧:** 開き括弧は文と同じ行に、閉じ括弧は新しい行に配置する。
+### インデント・フォーマット
 
-## ハードウェアアクセス
+- インデントはスペース2個または4個を一貫して使用
+- 波括弧は開始は同じ行に、終了は新しい行に配置
 
-- **ピン番号の定義:** ハードウェアリソースは`constexpr`を用いて定数として定義する。
-    ```cpp
-    constexpr uint8_t LED_PIN = 13;
-    ```
-- **直接操作を避ける:** 可能な限りArduino標準ライブラリを使用する。
+```cpp
+if (condition) {
+  doSomething();
+} else {
+  doSomethingElse();
+}
+```
 
-## メモリ管理
+### 式と文
 
-- **グローバル変数の最小化:** グローバル変数は必要最小限に抑える。
-- **動的メモリの注意:** `malloc`や`new`の使用は慎重に行い、メモリリークを防ぐ。 使用する場合は、必ず`free`や`delete`で解放する。
+- 複雑な条件式は括弧で明確に
+- マジックナンバーの使用を避け、定数を定義
 
-## セキュリティ
+```cpp
+// 不適切
+if (value > 500 && value < 1000) {
+  // ...
+}
 
-- **入力検証:** 外部入力は必ず検証する。
-    ```cpp
-    constexpr int MIN_VALUE = 0;
-    constexpr int MAX_VALUE = 100;
-    if (inputValue < MIN_VALUE || inputValue > MAX_VALUE) {
-        // エラー処理
-    }
-    ```
-- **デフォルトケースの設定:** `switch`文では必ず`default`ケースを設定する。
+// 適切
+constexpr int16_t THRESHOLD_MIN = 500;
+constexpr int16_t THRESHOLD_MAX = 1000;
 
-## Arduino特有の注意点
+if (value > THRESHOLD_MIN && value < THRESHOLD_MAX) {
+  // ...
+}
+```
 
-- `setup()`関数: 初期化処理を記述する。一度だけ実行される。
-- `loop()`関数: メインループ。繰り返し実行される。  `delay()`関数の使用は避け、`millis()`を使った非ブロッキングな処理を推奨する。
-- 割り込み処理:  ISR(Interrupt Service Routine)は短く、高速に処理する。
+## ハードウェア制御
+
+### ピン設定
+
+- ピン設定は`setup()`でまとめて行う
+- 入力ピンには適切なプルアップ/プルダウンを設定
+
+```cpp
+void setup() {
+  // 出力ピン
+  pinMode(PIN_LED_STATUS, OUTPUT);
+  pinMode(PIN_RELAY, OUTPUT);
+  
+  // 入力ピン
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
+  pinMode(PIN_SENSOR, INPUT);
+  
+  // 初期状態設定
+  digitalWrite(PIN_LED_STATUS, LOW);
+  digitalWrite(PIN_RELAY, LOW);
+}
+```
+
+### 省電力設計
+
+- 電池駆動の場合、スリープモードを活用
+- 不要なハードウェアは無効化
+
+```cpp
+#include <avr/sleep.h>
+#include <avr/power.h>
+
+void enterSleepMode() {
+  // 不要な周辺機能を無効化
+  power_adc_disable();
+  power_spi_disable();
+  
+  // スリープモード設定
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  sleep_mode();
+  
+  // ここから先は割り込み発生後に実行される
+  sleep_disable();
+  
+  // 必要な周辺機能を再有効化
+  power_adc_enable();
+  power_spi_enable();
+}
+```
 
 ## テスト
 
-- 単体テストを記述する。
-- テストフレームワークの使用を検討する。
+### 単体テスト
 
-## コードフォーマッタ
+- テスト用スケッチを作成
+- モジュールごとにテスト関数を用意
 
-- clang-formatの使用を推奨する。 プロジェクトルートに`.clang-format`ファイルを配置する。
+```cpp
+void testTemperatureSensor() {
+  Serial.println(F("Testing temperature sensor..."));
+  
+  float temp = readTemperature();
+  
+  Serial.print(F("Temperature: "));
+  Serial.println(temp);
+  
+  if (isnan(temp) || temp < -50.0 || temp > 100.0) {
+    Serial.println(F("TEST FAILED: Temperature out of range"));
+  } else {
+    Serial.println(F("TEST PASSED"));
+  }
+}
+```
 
-## 更新手順
+### デバッグ支援
 
-- このコーディング規約は必要に応じて更新される。 更新履歴をREADMEなどに記録する。
+- デバッグ用のプリプロセッサマクロを定義
+
+```cpp
+// デバッグモード定義
+#define DEBUG 1
+
+// デバッグ出力マクロ
+#if DEBUG
+  #define DEBUG_PRINT(x) Serial.print(x)
+  #define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+#endif
+
+// 使用例
+DEBUG_PRINTLN(F("Initializing..."));
+```
+
+## バージョン管理とドキュメント
+
+### コードヘッダ
+
+- 各ファイルの先頭にメタ情報を記載
+
+```cpp
+/**
+ * @file SensorModule.cpp
+ * @brief センサーモジュールの実装
+ * @author 開発者名
+ * @date 2025-04-09
+ * @version 1.2.0
+ */
+```
