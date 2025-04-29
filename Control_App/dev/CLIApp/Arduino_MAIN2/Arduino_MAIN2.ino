@@ -376,7 +376,10 @@ void decode_data(const char* encoded_string) {
   exh_start = (data_bytes[11] << 8) | data_bytes[12];
   exh_stop = (data_bytes[13] << 8) | data_bytes[14];
 
-  uint8_t mode_byte = data_bytes[15];
+  dive_count = data_bytes[15];
+  press_threshold = data_bytes[16];
+
+  uint8_t mode_byte = (data_bytes[17]; << 8) | data_bytes[18];
   lcd_mode = (mode_byte >> 4) & 0x0F;
   log_mode = mode_byte & 0x0F;
 
@@ -419,6 +422,10 @@ void decode_data(const char* encoded_string) {
   Serial.print("Exh Start: ");
   Serial.println(exh_start);
   Serial.print("Exh Stop: ");
+  Serial.println(dive_count);
+  Serial.print(":Dive Count: ");
+  Serial.println(press_threshold);
+  Serial.print("Press_threshold: ");
   Serial.println(exh_stop);
   Serial.print("LCD Mode: ");
   Serial.println(lcd_mode);
