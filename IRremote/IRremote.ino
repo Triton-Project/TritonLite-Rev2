@@ -1,5 +1,8 @@
 #include <IRremote.hpp>
+#include <EEPROM.h>
+#include <TimeLib.h>
 
+const size_t MAX_DATA_LENGTH = 32;  // 必要に応じて調整
 bool g_isSensingMode = false;
 
 #define IR_CMD_ENTER_SENSING_MODE 0x40
