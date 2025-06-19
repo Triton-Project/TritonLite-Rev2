@@ -630,7 +630,7 @@ void correctTime() {
 // 制御関連
 // 浮沈用電磁弁制御
 void CtrlValve() {
-  if (config._diveCount <= g_divedCount) return;
+  if (config._diveCount <= g_divedCount & !(config._diveCount == 0)) return;
   switch (g_valveCtrlState) {
     case 0:
       if ((g_timeNowMs - g_timeLastControlMs) > config._exhaustStartDelayMs) {
