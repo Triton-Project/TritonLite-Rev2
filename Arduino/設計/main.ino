@@ -152,7 +152,7 @@ void setup() {
     Serial.println("Init failed!");
     Serial.println("Are SDA/SCL connected correctly?");
     Serial.println("Blue Robotics Bar30: White=SDA, Green=SCL");
-    delay(5000);
+    dispLcdError("Depth FAILED!");
   }
   DepthSensor.setModel(MS5837::MS5837_30BA);
   DepthSensor.setFluidDensity(997); // NANIKORE
