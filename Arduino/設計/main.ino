@@ -748,7 +748,7 @@ bool writeSDcard_CTRL() {
   CTRLlog += ",CTRL,";
   CTRLlog += "MSG,";
 
-  switch(g_valveCtrlState) {
+  switch(g_movementState) {
     case 1:
       CTRLlog += "UP";
       break;
@@ -940,16 +940,20 @@ void handleLcdDisp() {
     case 2: // 水温・外圧・内圧
       lcd.clear();
 
-      lcd.print("TMP: ");
+      lcd.print("TMP:");
       lcd.print(g_noramlTemp);
-      lcd.print(" PRS-TMP: ");
-      lcd.print(g_prsExternalTmp);
       lcd.setCursor(0,1);
-      lcd.print("PRS ");
-      lcd.print("EXT: ");
+      lcd.print("PRS-TMP:");
+      lcd.print(g_prsExternalTmp);
+      break;
+    case 3:
+      lcd.clear();
+
+      lcd.print("EXT:");
       lcd.print(g_prsExternal);
-      lcd.print("INT: ");
-      lcd.print(g_prsInternalMbar);
+      lcd.setCursor(0,1);
+      lcd.print("INT:");
+      lcd.print(((g_prsInternalMbar * 68.94) + 1013.25));
       break;
     default: // LCD表示なし
       lcd.noBacklight();
@@ -961,7 +965,7 @@ void dispLcd_CTRL() {
   lcd.clear();
 
   lcd.print("V_CTRL: ");
-  switch(g_valveCtrlState) {
+  switch(g_movementState) {
     case 1:
       lcd.print("UP");
       break;
@@ -976,9 +980,9 @@ void dispLcd_CTRL() {
       break;
   }
   lcd.setCursor(0,1);
-  lcd.print("V1SUP: ");
+  lcd.print("V1SUP:");
   lcd.print(g_isValve1SupplyOpen);
-  lcd.print(" V2EXH: ");
+  lcd.print(" V2EXH:");
   lcd.print(g_isValve2ExhaustOpen);
 }
 
