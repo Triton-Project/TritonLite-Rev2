@@ -36,8 +36,6 @@ void loop() {
         g_isSensingMode = false;
       }
     }
-    digitalWrite(PIN_LED_GREEN, HIGH);
-    digitalWrite(PIN_LED_RED, HIGH);
   }
 
   // 
